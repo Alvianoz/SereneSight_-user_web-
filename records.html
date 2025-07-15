@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Records</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background-color: #f0f2f5;
+        color: #333;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+      }
+
+      /* Header */
+      .header {
+        margin-top: 12px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 8px 18px;
+        border-radius: 8px;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+      }
+
+      .logo h1 {
+        color: #2d3748;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+      }
+
+      .logo h1 i {
+        color: #48bb78;
+        margin-right: 0.5rem;
+      }
+
+      .logo img {
+        width: 45px;
+        height: 45px;
+        margin-right: 10px;
+        vertical-align: middle;
+      }
+
+      .user-menu {
+        display: flex;
+        align-items: center;
+      }
+
+      .user-menu .icon-btn {
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        color: #4a5568;
+        margin-left: 1rem;
+        cursor: pointer;
+      }
+
+      .user-menu .icon-btn:hover {
+        color: #48bb78;
+      }
+
+      .signout-btn {
+        padding: 10px 15px;
+        background-color: #6a63a4;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        margin-left: 12px;
+        cursor: pointer;
+      }
+
+      .signout-btn:hover {
+        background-color: #6d28d9;
+        transition: all 0.3s ease;
+      }
+
+      .start-btn:hover {
+        background-color: #6d28d9;
+        transition: all 0.3s ease;
+      }
+
+      .start-btn {
+        padding: 10px 15px;
+        background-color: #6a63a4;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        width: 100%;
+        grid-template-columns: 1fr;
+      }
+
+      /* Main Content */
+      .main-content {
+        padding: 2rem 0;
+      }
+
+      .page-title {
+        margin-bottom: 2rem;
+      }
+
+      .page-title h2 {
+        color: #2d3748;
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .page-title p {
+        color: #718096;
+        font-size: 0.9rem;
+      }
+
+      /* Health Overview Cards */
+      .health-overview {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+      }
+
+      .card-title {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        color: #4a5568;
+        font-weight: 500;
+      }
+
+      .card-title i {
+        margin-right: 0.5rem;
+      }
+
+      .card-value {
+        font-size: 1.7rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+      }
+
+      .card-subtitle {
+        font-size: 0.875rem;
+        color: #718096;
+      }
+
+      /* Connected Devices */
+      .devices-section {
+        margin-bottom: 2rem;
+      }
+
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      .section-title {
+        color: #2d3748;
+        font-size: 1.25rem;
+        font-weight: 600;
+      }
+
+      /* Navigation */
+      .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: #fff;
+        display: flex;
+        justify-content: space-around;
+        padding: 0.75rem 0;
+        box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-decoration: none;
+        color: #a0aec0;
+      }
+
+      .nav-item.active2 {
+        color: #48bb78;
+      }
+
+      .nav-item i {
+        font-size: 1.25rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .nav-text {
+        font-size: 0.75rem;
+      }
+
+      .chart-section {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(44, 62, 80, 0.08);
+        padding: 32px 24px;
+        margin-bottom: 1rem;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .health-overview {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .health-overview {
+          grid-template-columns: 1fr;
+        }
+        .logo h1 {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <header class="header">
+      <div class="container">
+        <div class="header-content">
+          <div class="logo">
+            <img src="W.png" alt="Logo" />
+            <h1>Serene Sight</h1>
+          </div>
+
+          <div class="user-menu">
+            <button class="icon-btn" id="notificationBtn">
+              <i class="fas fa-bell"></i>
+            </button>
+            <button class="icon-btn" id="profileBtn">
+              <i class="fas fa-user"></i>
+            </button>
+            <button
+              class="signout-btn"
+              id="signOutBtn"
+              onclick="window.location.href='index.html'"
+            >
+              Sign Out
+              <i class="fas fa-sign-out-alt"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="container">
+        <div class="page-title">
+          <h2>Your Records</h2>
+        </div>
+
+        <!-- Health Overview Cards -->
+        <div class="health-overview">
+          <div class="card heart-rate">
+            <div class="card-title">
+              <i class="fa-solid fa-video"></i>
+              Records
+            </div>
+            <div class="card-value">
+              <button class="start-btn">View all</button>
+              <button class="start-btn">Compare</button>
+              <button class="start-btn">Print Report</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Connected Devices -->
+        <div class="devices-section">
+          <div class="section-header">
+            <div class="section-title">Last Analysis</div>
+          </div>
+          <div class="chart-section">
+            <h2 style="color: #6a63a4; margin-bottom: 20px">Last Week Score</h2>
+            <canvas id="expressionChart" height="100"></canvas>
+          </div>
+          <div class="chart-section">
+            <h2 style="color: #6a63a4; margin-bottom: 20px">Last Month Score</h2>
+            <canvas id="emotionChart" height="100"></canvas>
+          </div>
+        </div>
+        <nav class="bottom-nav">
+          <a href="home.html" class="nav-item active1">
+            <i class="fa-solid fa-house"></i>
+            <span class="nav-text">Home</span>
+          </a>
+          <a href="records.html" class="nav-item active2">
+            <i class="fa-solid fa-video"></i>
+            <span class="nav-text">Records</span>
+          </a>
+          <a href="profile.html" class="nav-item active3">
+            <i class="fa-solid fa-user"></i>
+            <span class="nav-text">Profile</span>
+          </a>
+        </nav>
+      </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+
+    <script>
+      // Toggle notifications or user profile dropdown
+      document
+        .getElementById("notificationBtn")
+        .addEventListener("click", function () {
+          alert("Notifications feature coming soon!");
+        });
+
+      document
+        .getElementById("profileBtn")
+        .addEventListener("click", function () {
+          // In a real application, this would toggle a profile dropdown
+          window.location.href = "profile.html";
+        });
+
+      // Example data for expressions
+
+
+
+      const emotionData = {
+        labels: ["First Week", "Second Week", "Third Week", "Fourth week"],
+        datasets: [
+          {
+            label: "User Emotions",
+            data: [67, 88, 75, 65, 60], // Replace with your dynamic data
+            backgroundColor: [
+              "#6a11cb",
+              "#2575fc",
+              "#fbc531",
+              "#e84118",
+            ],
+            borderRadius: 8,
+          },
+        ],
+      };
+
+      const config2 = {
+        type: "bar",
+        data: emotionData,
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            title: { display: false },
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { stepSize: 10 },
+            },
+          },
+        },
+      };
+
+      new Chart(document.getElementById("emotionChart"), config2);
+
+
+      const expressionData = {
+        labels: ["Sunday", "Tuesday", "Wednesday", "Thrusday", "Friday"],
+        datasets: [
+          {
+            label: "User Expressions",
+            data: [25, 40, 15, 10, 10], // Replace with your dynamic data
+            backgroundColor: [
+              "#6a11cb",
+              "#2575fc",
+              "#fbc531",
+              "#e84118",
+              "#00b894",
+            ],
+            borderRadius: 8,
+          },
+        ],
+      };
+
+      const config = {
+        type: "bar",
+        data: expressionData,
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            title: { display: false },
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { stepSize: 10 },
+            },
+          },
+        },
+      };
+
+      new Chart(document.getElementById("expressionChart"), config);
+      // Example data for expressions
+      
+    </script>
+  </body>
+</html>
