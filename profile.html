@@ -18,8 +18,9 @@
       }
 
       body {
-        background-color: #f0f2f5;
+        background: linear-gradient(180deg, #f0f2f5 0%, #6a63a4 100%);
         color: #333;
+        min-height: 100vh;
       }
 
       .container {
@@ -147,13 +148,15 @@
 
       /* Health Overview Cards */
       .health-overview {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        display: flex;
+        align-items: center;
+        justify-content: center;
         gap: 1.5rem;
         margin-bottom: 2rem;
       }
 
       .card {
+        width: 100%;
         background-color: #fff;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -228,7 +231,7 @@
       }
 
       .nav-item.active3 {
-        color: #48bb78;
+        color: #6a63a4;
       }
 
       .nav-item i {

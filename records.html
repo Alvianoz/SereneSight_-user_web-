@@ -18,7 +18,8 @@
       }
 
       body {
-        background-color: #f0f2f5;
+        background: linear-gradient(180deg, #f0f2f5 0%, #6a63a4 100%);
+        min-height: 100vh;
         color: #333;
       }
 
@@ -147,13 +148,14 @@
 
       /* Health Overview Cards */
       .health-overview {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        display: flex;
+        align-items: center;
         gap: 1.5rem;
         margin-bottom: 2rem;
       }
 
       .card {
+        width: 100%;
         background-color: #fff;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -173,6 +175,11 @@
       }
 
       .card-value {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 1rem;
         font-size: 1.7rem;
         font-weight: 700;
         color: #2d3748;
@@ -186,7 +193,7 @@
 
       /* Connected Devices */
       .devices-section {
-        margin-bottom: 2rem;
+        margin-bottom: 3rem;
       }
 
       .section-header {
@@ -224,7 +231,7 @@
       }
 
       .nav-item.active2 {
-        color: #48bb78;
+        color: #6a63a4;
       }
 
       .nav-item i {
@@ -242,6 +249,27 @@
         box-shadow: 0 4px 16px rgba(44, 62, 80, 0.08);
         padding: 32px 24px;
         margin-bottom: 1rem;
+      }
+
+      .records-items {
+        background: linear-gradient(180deg, #a0aec0 0%, #6a63a4 100%);
+        color: white;
+        padding: 14px 20px;
+        margin-bottom: 12px;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        font-weight: 500;
+        box-shadow: 0 2px 8px rgba(106, 99, 164, 0.08);
+        display: flex;
+        align-items: center;
+        transition:
+          transform 0.15s,
+          box-shadow 0.15s;
+      }
+
+      .records-items:hover {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 6px 18px rgba(106, 99, 164, 0.15);
       }
 
       /* Responsive */
@@ -319,12 +347,23 @@
             <div class="section-title">Last Analysis</div>
           </div>
           <div class="chart-section">
-            <h2 style="color: #6a63a4; margin-bottom: 20px">Last Week Score</h2>
-            <canvas id="expressionChart" height="100"></canvas>
+            <h2 style="color: #6a63a4; margin-bottom: 20px">Last Week Records</h2>
+            <div class="records">
+              <div class="records-items">Sunday : Neutral 😐</div>
+              <div class="records-items">Tuesday : Neutral 😐</div>
+              <div class="records-items">Wednesday : Happy 😊</div>
+              <div class="records-items">Thursday : Neutral 😐</div>
+              <div class="records-items">Friday : Angry 😠</div>
+            </div>
           </div>
           <div class="chart-section">
-            <h2 style="color: #6a63a4; margin-bottom: 20px">Last Month Score</h2>
-            <canvas id="emotionChart" height="100"></canvas>
+            <h2 style="color: #6a63a4; margin-bottom: 20px">Last Month Records</h2>
+            <div class="records">
+              <div class="records-items">First Week : Neutral 😐</div>
+              <div class="records-items">Second Week : Neutral 😐</div>
+              <div class="records-items">Third Week : Happy 😊</div>
+              <div class="records-items">Fourth Week : Neutral 😐</div>
+            </div>
           </div>
         </div>
         <nav class="bottom-nav">
@@ -360,88 +399,6 @@
           // In a real application, this would toggle a profile dropdown
           window.location.href = "profile.html";
         });
-
-      // Example data for expressions
-
-
-
-      const emotionData = {
-        labels: ["First Week", "Second Week", "Third Week", "Fourth week"],
-        datasets: [
-          {
-            label: "User Emotions",
-            data: [67, 88, 75, 65, 60], // Replace with your dynamic data
-            backgroundColor: [
-              "#6a11cb",
-              "#2575fc",
-              "#fbc531",
-              "#e84118",
-            ],
-            borderRadius: 8,
-          },
-        ],
-      };
-
-      const config2 = {
-        type: "bar",
-        data: emotionData,
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { display: false },
-            title: { display: false },
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: { stepSize: 10 },
-            },
-          },
-        },
-      };
-
-      new Chart(document.getElementById("emotionChart"), config2);
-
-
-      const expressionData = {
-        labels: ["Sunday", "Tuesday", "Wednesday", "Thrusday", "Friday"],
-        datasets: [
-          {
-            label: "User Expressions",
-            data: [25, 40, 15, 10, 10], // Replace with your dynamic data
-            backgroundColor: [
-              "#6a11cb",
-              "#2575fc",
-              "#fbc531",
-              "#e84118",
-              "#00b894",
-            ],
-            borderRadius: 8,
-          },
-        ],
-      };
-
-      const config = {
-        type: "bar",
-        data: expressionData,
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { display: false },
-            title: { display: false },
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: { stepSize: 10 },
-            },
-          },
-        },
-      };
-
-      new Chart(document.getElementById("expressionChart"), config);
-      // Example data for expressions
-      
     </script>
   </body>
 </html>

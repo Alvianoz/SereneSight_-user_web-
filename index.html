@@ -163,7 +163,7 @@
 <body>
     <div class="container">
         <div class="left-box">
-            <div class="logo"><img src="W.png" alt="Logo"> Serene Sight</div>
+            <div class="logo"><img src="W.png" alt="Logo"> SereneCam</div>
             <h1>Hello, <br />Welcome Back</h1>
             <p>Monitor your productivity</p>
 
@@ -175,7 +175,7 @@
                     <label><input type="checkbox" /> Remember me</label>
                 </div>
 
-                <a href="records.html" class="button" style="text-decoration: none; color: #ffffff;">Sign In</a>
+                <button class="button" type="submit" id="button">Sign In</button>
             </form>
         </div>
 
@@ -184,5 +184,19 @@
         </div>
     </div>
 </body>
+<script>
+    document.getElementById('button').addEventListener('click', function (event) {
+        const form = this.closest('form');
+        const username = form.querySelector('input[type="text"]').value.trim();
+        const password = form.querySelector('input[type="password"]').value.trim();
+        if (!username || !password) {
+            alert('Please fill in both Username and Password.');
+            event.preventDefault();
+            return;
+        }
+        window.location.href = 'home.html';
+        event.preventDefault();
+    });
+</script>
 
 </html>

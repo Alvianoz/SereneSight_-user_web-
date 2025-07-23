@@ -18,7 +18,9 @@
       }
 
       body {
-        background-color: #f0f2f5;
+        /* Old: background-color: #f0f2f5; */
+        background: linear-gradient(180deg, #f0f2f5 0%, #6a63a4 100%);
+        min-height: 100vh;
         color: #333;
       }
 
@@ -114,6 +116,7 @@
       }
 
       .start-btn {
+        width: 100%;
         padding: 10px 15px;
         background-color: #6a63a4;
         color: white;
@@ -145,13 +148,15 @@
 
       /* Health Overview Cards */
       .health-overview {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         gap: 1.5rem;
         margin-bottom: 2rem;
       }
 
       .card {
+        width: 100%;
         background-color: #fff;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -200,24 +205,9 @@
         width: 75%; /* 75 BPM */
       }
 
-      .spo2 .progress-value {
-        background-color: #6a63a4; /* Pink for SpO2 */
-        width: 97%; /* 97% */
-      }
-
-      .steps .progress-value {
-        background-color: #6a63a4; /* Blue for steps */
-        width: 67%; /* 4,023 of 6,000 goal */
-      }
-
-      .sleep .progress-value {
-        background-color: #6a63a4; /* Purple for sleep */
-        width: 92%; /* 92% quality */
-      }
-
       /* Connected Devices */
       .devices-section {
-        margin-bottom: 2rem;
+        margin-bottom: 3rem;
       }
 
       .section-header {
@@ -255,7 +245,7 @@
       }
 
       .nav-item.active1 {
-        color: #48bb78;
+        color: #6a63a4;
       }
 
       .nav-item i {
@@ -278,7 +268,8 @@
       /* Responsive */
       @media (max-width: 768px) {
         .health-overview {
-          grid-template-columns: 1fr 1fr;
+          flex-direction: column;
+          gap: 1rem;
         }
       }
 
@@ -333,11 +324,11 @@
         <div class="health-overview">
           <div class="card heart-rate">
             <div class="card-title">
-              <i class="fa-solid fa-camera"></i>
+              <i class="fa-solid fa-camera" style="color: #6a63a4"></i>
               Camera Status
             </div>
-            <div class="card-value">Online</div>
-            <div class="card-subtitle">2:43:12</div>
+            <div class="card-value">Offline</div>
+            <div class="card-subtitle">2:43:12 (Paused)</div>
             <div class="progress-bar">
               <div class="progress-value"></div>
             </div>
@@ -345,11 +336,12 @@
 
           <div class="card heart-rate">
             <div class="card-title">
-              <i class="fa-solid fa-video"></i>
-              Start / Stop Recording
+              <i class="fa-solid fa-video" style="color: #6a63a4"></i>
+              Recording
             </div>
             <div class="card-value">
-              <button class="start-btn">Stop</button>
+              <button class="start-btn">Start</button>
+              <button class="start-btn">Configure</button>
             </div>
           </div>
         </div>
@@ -360,8 +352,8 @@
             <div class="section-title">Current Analysis</div>
           </div>
           <div class="chart-section">
-            <h2 style="color: #6a63a4; margin-bottom: 20px">User Emotion</h2>
-            <canvas id="emotionChart" height="100"></canvas>
+            <h2 style="color: #6a63a4; margin-bottom: 20px">User Mental State</h2>
+            <canvas id="mentalChart" height="100"></canvas>
           </div>
           <div class="chart-section">
             <h2 style="color: #6a63a4; margin-bottom: 20px">User Expression</h2>
@@ -402,6 +394,53 @@
           window.location.href = "profile.html";
         });
 
+
+
+
+
+
+      // Example data for expressions
+      const mentalData = {
+        labels: ["Good", "Normal", "Bad", "Depressed"],
+        datasets: [
+          {
+            label: "User Mental State",
+            data: [35, 45, 20, 10, 5], // Replace with your dynamic data
+            backgroundColor: [
+              "#fbc531",
+              "#2575fc",
+              "#6a11cb",
+              "#e84118",
+            ],
+            borderRadius: 8,
+          },
+        ],
+      };
+
+      const config = {
+        type: "bar",
+        data: mentalData,
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            title: { display: false },
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { stepSize: 10 },
+            },
+          },
+        },
+      };
+
+      new Chart(document.getElementById("mentalChart"), config);
+
+
+
+
+
       // Example data for expressions
       const expressionData = {
         labels: ["Happy", "Neutral", "Sad", "Angry", "Surprised"],
@@ -410,9 +449,9 @@
             label: "User Expressions",
             data: [25, 40, 15, 10, 10], // Replace with your dynamic data
             backgroundColor: [
-              "#6a11cb",
-              "#2575fc",
               "#fbc531",
+              "#2575fc",
+              "#6a11cb",
               "#e84118",
               "#00b894",
             ],
@@ -421,7 +460,7 @@
         ],
       };
 
-      const config = {
+      const config2 = {
         type: "bar",
         data: expressionData,
         options: {
@@ -439,45 +478,7 @@
         },
       };
 
-      new Chart(document.getElementById("expressionChart"), config);
-      // Example data for expressions
-      const emotionData = {
-        labels: ["Happy", "Neutral", "Sad", "Angry", "Surprised"],
-        datasets: [
-          {
-            label: "User Expressions",
-            data: [25, 40, 15, 10, 10], // Replace with your dynamic data
-            backgroundColor: [
-              "#6a11cb",
-              "#2575fc",
-              "#fbc531",
-              "#e84118",
-              "#00b894",
-            ],
-            borderRadius: 8,
-          },
-        ],
-      };
-
-      const config2 = {
-        type: "bar",
-        data: emotionData,
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { display: false },
-            title: { display: false },
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: { stepSize: 10 },
-            },
-          },
-        },
-      };
-
-      new Chart(document.getElementById("emotionChart"), config);
+      new Chart(document.getElementById("expressionChart"), config2);
     </script>
   </body>
 </html>
