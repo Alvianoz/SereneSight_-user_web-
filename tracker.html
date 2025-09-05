@@ -521,7 +521,7 @@
 
             <div class="stats-grid">
               <div class="emotion-panel">
-                <h3>📊 Analisis Emosi</h3>
+                <h3>📊 Emotion Analisys</h3>
                 <div id="emotionData">
                   <div class="emotion-item">
                     <span class="emotion-name">😐 Neutral</span>
@@ -640,447 +640,408 @@
           // In a real application, this would toggle a profile dropdown
           window.location.href = "profile.html";
         });
-
-      class EmotionTracker {
-        constructor() {
-          this.video = document.getElementById("video");
-          this.canvas = document.getElementById("canvas");
-          this.ctx = this.canvas.getContext("2d");
-          this.isTracking = false;
-          this.emotionHistory = [];
-          this.faceMesh = null;
-          this.camera = null;
-          this.lastBlink = 0;
-          this.blinkCount = 0;
-          this.startTime = Date.now();
-
-          this.initializeElements();
-          this.initializeMediaPipe();
-        }
-
-        initializeElements() {
-          this.startBtn = document.getElementById("startBtn");
-          this.stopBtn = document.getElementById("stopBtn");
-          this.clearBtn = document.getElementById("clearBtn");
-          this.status = document.getElementById("status");
-          this.emotionData = document.getElementById("emotionData");
-          this.historyData = document.getElementById("historyData");
-
-          this.startBtn.addEventListener("click", () => this.startTracking());
-          this.stopBtn.addEventListener("click", () => this.stopTracking());
-          this.clearBtn.addEventListener("click", () => this.clearHistory());
-        }
-
-        initializeMediaPipe() {
-          try {
-            this.status.textContent = "Memuat MediaPipe...";
-            this.status.className = "status loading";
-
-            this.faceMesh = new FaceMesh({
-              locateFile: (file) => {
-                return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
-              },
-            });
-
-            this.faceMesh.setOptions({
-              maxNumFaces: 1,
-              refineLandmarks: true,
-              minDetectionConfidence: 0.5,
-              minTrackingConfidence: 0.5,
-            });
-
-            this.faceMesh.onResults(this.onResults.bind(this));
-
-            this.status.textContent =
-              'System ready! Click "Start Tracking" to begin.';
-            this.status.className = "status ready";
-            this.startBtn.disabled = false;
-          } catch (error) {
-            console.error("Error initializing MediaPipe:", error);
-            this.status.textContent =
-              "Failed loading system detection. Try refresh the page.";
-            this.status.className = "status error";
-          }
-        }
-
-        async startTracking() {
-          try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-              video: { width: 640, height: 480 },
-            });
-
-            this.video.srcObject = stream;
-
-            this.video.addEventListener("loadedmetadata", () => {
-              this.canvas.width = this.video.videoWidth;
-              this.canvas.height = this.video.videoHeight;
-              this.canvas.style.width = this.video.offsetWidth + "px";
-              this.canvas.style.height = this.video.offsetHeight + "px";
-            });
-
-            this.camera = new Camera(this.video, {
-              onFrame: async () => {
-                if (this.isTracking) {
-                  await this.faceMesh.send({ image: this.video });
+      
+        class EmotionTracker {
+            constructor() {
+                this.video = document.getElementById('video');
+                this.canvas = document.getElementById('canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.isTracking = false;
+                this.emotionHistory = [];
+                this.faceMesh = null;
+                this.camera = null;
+                this.lastBlink = 0;
+                this.blinkCount = 0;
+                this.startTime = Date.now();
+                
+                this.initializeElements();
+                this.initializeMediaPipe();
+            }
+            
+            initializeElements() {
+                this.startBtn = document.getElementById('startBtn');
+                this.stopBtn = document.getElementById('stopBtn');
+                this.clearBtn = document.getElementById('clearBtn');
+                this.status = document.getElementById('status');
+                this.emotionData = document.getElementById('emotionData');
+                this.historyData = document.getElementById('historyData');
+                
+                this.startBtn.addEventListener('click', () => this.startTracking());
+                this.stopBtn.addEventListener('click', () => this.stopTracking());
+                this.clearBtn.addEventListener('click', () => this.clearHistory());
+            }
+            
+            initializeMediaPipe() {
+                try {
+                    this.status.textContent = 'Memuat MediaPipe...';
+                    this.status.className = 'status loading';
+                    
+                    this.faceMesh = new FaceMesh({
+                        locateFile: (file) => {
+                            return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
+                        }
+                    });
+                    
+                    this.faceMesh.setOptions({
+                        maxNumFaces: 1,
+                        refineLandmarks: true,
+                        minDetectionConfidence: 0.5,
+                        minTrackingConfidence: 0.5
+                    });
+                    
+                    this.faceMesh.onResults(this.onResults.bind(this));
+                    
+                    this.status.textContent = 'System ready! Click "Start Tracking" to begin.';
+                    this.status.className = 'status ready';
+                    this.startBtn.disabled = false;
+                    
+                } catch (error) {
+                    console.error('Error initializing MediaPipe:', error);
+                    this.status.textContent = 'Failed loading system detection. Try refresh the page.';
+                    this.status.className = 'status error';
                 }
-              },
-              width: 640,
-              height: 480,
-            });
-
-            this.camera.start();
-            this.isTracking = true;
-            this.startBtn.disabled = true;
-            this.stopBtn.disabled = false;
-            this.status.textContent = "Tracking aktif - Lihat ke kamera!";
-            this.status.className = "status ready";
-            this.startTime = Date.now();
-            this.blinkCount = 0;
-          } catch (error) {
-            console.error("Error accessing camera:", error);
-            this.status.textContent =
-              "Failed accses camera. Pastikan izin kamera diberikan.";
-            this.status.className = "status error";
-          }
-        }
-
-        stopTracking() {
-          this.isTracking = false;
-
-          if (this.camera) {
-            this.camera.stop();
-          }
-
-          if (this.video.srcObject) {
-            this.video.srcObject.getTracks().forEach((track) => track.stop());
-            this.video.srcObject = null;
-          }
-
-          this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-          this.startBtn.disabled = false;
-          this.stopBtn.disabled = true;
-          this.status.textContent = "Tracking stoped.";
-          this.status.className = "status";
-
-          // Reset face metrics
-          document.getElementById("faceDetected").textContent = "❌";
-          document.getElementById("blinkRate").textContent = "-";
-          document.getElementById("mouthOpen").textContent = "-";
-          document.getElementById("headPose").textContent = "-";
-        }
-
-        onResults(results) {
-          this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-          if (
-            results.multiFaceLandmarks &&
-            results.multiFaceLandmarks.length > 0
-          ) {
-            const landmarks = results.multiFaceLandmarks[0];
-
-            // Draw face landmarks
-            this.drawFaceLandmarks(landmarks);
-
-            // Analyze emotions based on facial features
-            const emotions = this.analyzeFacialFeatures(landmarks);
-
-            // Update displays
-            this.updateEmotionDisplay(emotions);
-            this.updateFaceMetrics(landmarks);
-            this.addToHistory(emotions);
-
-            document.getElementById("faceDetected").textContent = "✅";
-          } else {
-            document.getElementById("faceDetected").textContent = "❌";
-          }
-        }
-
-        drawFaceLandmarks(landmarks) {
-          this.ctx.fillStyle = "#00ff00";
-          this.ctx.strokeStyle = "#00ff00";
-          this.ctx.lineWidth = 1;
-
-          // Draw face contour
-          this.ctx.beginPath();
-          const faceContour = [
-            10, 151, 9, 8, 168, 6, 148, 176, 149, 150, 136, 172, 58, 132, 93,
-            234, 127, 162, 21, 54, 103, 67, 109, 10,
-          ];
-
-          landmarks.forEach((landmark, index) => {
-            const x = landmark.x * this.canvas.width;
-            const y = landmark.y * this.canvas.height;
-
-            if (faceContour.includes(index)) {
-              this.ctx.fillRect(x - 1, y - 1, 2, 2);
             }
-          });
-
-          // Draw eyes
-          this.drawEyes(landmarks);
-
-          // Draw mouth
-          this.drawMouth(landmarks);
-        }
-
-        drawEyes(landmarks) {
-          this.ctx.fillStyle = "#ff0000";
-
-          // Left eye
-          const leftEye = [
-            33, 7, 163, 144, 145, 153, 154, 155, 133, 173, 157, 158, 159, 160,
-            161, 246,
-          ];
-          leftEye.forEach((index) => {
-            const point = landmarks[index];
-            const x = point.x * this.canvas.width;
-            const y = point.y * this.canvas.height;
-            this.ctx.fillRect(x - 1, y - 1, 2, 2);
-          });
-
-          // Right eye
-          const rightEye = [
-            362, 382, 381, 380, 374, 373, 390, 249, 263, 466, 388, 387, 386,
-            385, 384, 398,
-          ];
-          rightEye.forEach((index) => {
-            const point = landmarks[index];
-            const x = point.x * this.canvas.width;
-            const y = point.y * this.canvas.height;
-            this.ctx.fillRect(x - 1, y - 1, 2, 2);
-          });
-        }
-
-        drawMouth(landmarks) {
-          this.ctx.fillStyle = "#0000ff";
-
-          // Mouth outline
-          const mouth = [
-            61, 84, 17, 314, 405, 320, 307, 375, 321, 308, 324, 318, 402, 317,
-            14, 87, 178, 88, 95, 78, 191, 80, 81, 82, 13, 312, 311, 310, 415,
-            13,
-          ];
-          mouth.forEach((index) => {
-            const point = landmarks[index];
-            const x = point.x * this.canvas.width;
-            const y = point.y * this.canvas.height;
-            this.ctx.fillRect(x - 1, y - 1, 2, 2);
-          });
-        }
-
-        analyzeFacialFeatures(landmarks) {
-          // Simple emotion analysis based on facial geometry
-          const emotions = {
-            happy: 0,
-            sad: 0,
-            angry: 0,
-            surprised: 0,
-            focused: 0,
-            neutral: 0.5,
-          };
-
-          // Mouth analysis
-          const mouthLeft = landmarks[61];
-          const mouthRight = landmarks[291];
-          const mouthTop = landmarks[13];
-          const mouthBottom = landmarks[14];
-
-          const mouthWidth = Math.abs(mouthRight.x - mouthLeft.x);
-          const mouthHeight = Math.abs(mouthBottom.y - mouthTop.y);
-          const mouthRatio = mouthHeight / mouthWidth;
-
-          // Eye analysis
-          const leftEyeTop = landmarks[159];
-          const leftEyeBottom = landmarks[145];
-          const rightEyeTop = landmarks[386];
-          const rightEyeBottom = landmarks[374];
-
-          const leftEyeHeight = Math.abs(leftEyeBottom.y - leftEyeTop.y);
-          const rightEyeHeight = Math.abs(rightEyeBottom.y - rightEyeTop.y);
-          const avgEyeHeight = (leftEyeHeight + rightEyeHeight) / 2;
-
-          // Eyebrow analysis
-          const leftBrow = landmarks[70];
-          const rightBrow = landmarks[107];
-          const noseBridge = landmarks[9];
-
-          const browHeight = Math.abs(
-            (leftBrow.y + rightBrow.y) / 2 - noseBridge.y
-          );
-
-          // Emotion detection logic
-          if (mouthRatio > 0.02 && avgEyeHeight > 0.01) {
-            emotions.surprised = Math.min(mouthRatio * 20, 1);
-          }
-
-          if (mouthWidth > 0.05 && mouthRatio < 0.015) {
-            emotions.happy = Math.min(mouthWidth * 10, 1);
-          }
-
-          if (browHeight < 0.02) {
-            emotions.angry = Math.min((0.02 - browHeight) * 30, 1);
-          }
-
-          if (avgEyeHeight < 0.008) {
-            emotions.focused = Math.min((0.008 - avgEyeHeight) * 50, 1);
-          }
-
-          if (mouthRatio < 0.01 && avgEyeHeight < 0.012) {
-            emotions.sad = Math.min((0.01 - mouthRatio) * 20, 1);
-          }
-
-          // Normalize emotions
-          const total = Object.values(emotions).reduce(
-            (sum, val) => sum + val,
-            0
-          );
-          if (total > 0) {
-            Object.keys(emotions).forEach((key) => {
-              emotions[key] = emotions[key] / total;
-            });
-          }
-
-          return emotions;
-        }
-
-        updateFaceMetrics(landmarks) {
-          // Blink detection
-          const leftEyeTop = landmarks[159];
-          const leftEyeBottom = landmarks[145];
-          const rightEyeTop = landmarks[386];
-          const rightEyeBottom = landmarks[374];
-
-          const leftEyeHeight = Math.abs(leftEyeBottom.y - leftEyeTop.y);
-          const rightEyeHeight = Math.abs(rightEyeBottom.y - rightEyeTop.y);
-          const avgEyeHeight = (leftEyeHeight + rightEyeHeight) / 2;
-
-          if (avgEyeHeight < 0.006) {
-            const now = Date.now();
-            if (now - this.lastBlink > 200) {
-              this.blinkCount++;
-              this.lastBlink = now;
+            
+            async startTracking() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: { width: 640, height: 480 }
+                    });
+                    
+                    this.video.srcObject = stream;
+                    
+                    this.video.addEventListener('loadedmetadata', () => {
+                        this.canvas.width = this.video.videoWidth;
+                        this.canvas.height = this.video.videoHeight;
+                        this.canvas.style.width = this.video.offsetWidth + 'px';
+                        this.canvas.style.height = this.video.offsetHeight + 'px';
+                    });
+                    
+                    this.camera = new Camera(this.video, {
+                        onFrame: async () => {
+                            if (this.isTracking) {
+                                await this.faceMesh.send({image: this.video});
+                            }
+                        },
+                        width: 640,
+                        height: 480
+                    });
+                    
+                    this.camera.start();
+                    this.isTracking = true;
+                    this.startBtn.disabled = true;
+                    this.stopBtn.disabled = false;
+                    this.status.textContent = 'Tracking aktif - Lihat ke kamera!';
+                    this.status.className = 'status ready';
+                    this.startTime = Date.now();
+                    this.blinkCount = 0;
+                    
+                } catch (error) {
+                    console.error('Error accessing camera:', error);
+                    this.status.textContent = 'Failed accses camera. Pastikan izin kamera diberikan.';
+                    this.status.className = 'status error';
+                }
             }
-          }
-
-          const timeElapsed = (Date.now() - this.startTime) / 60000; // minutes
-          const blinkRate =
-            timeElapsed > 0 ? Math.round(this.blinkCount / timeElapsed) : 0;
-
-          // Mouth openness
-          const mouthTop = landmarks[13];
-          const mouthBottom = landmarks[14];
-          const mouthOpenness = Math.abs(mouthBottom.y - mouthTop.y);
-          const mouthPercent = Math.round(mouthOpenness * 1000);
-
-          // Head pose (simplified)
-          const noseTip = landmarks[1];
-          const headPose =
-            noseTip.x > 0.55 ? "Right" : noseTip.x < 0.45 ? "Left" : "Center";
-
-          // Update display
-          document.getElementById("blinkRate").textContent = `${blinkRate}/min`;
-          document.getElementById("mouthOpen").textContent = `${mouthPercent}%`;
-          document.getElementById("headPose").textContent = headPose;
-        }
-
-        updateEmotionDisplay(emotions) {
-          const emotionItems =
-            this.emotionData.querySelectorAll(".emotion-item");
-          const emotionNames = [
-            "happy",
-            "sad",
-            "angry",
-            "surprised",
-            "focused",
-            "neutral",
-          ];
-
-          emotionItems.forEach((item, index) => {
-            const emotionName = emotionNames[index];
-            const emotionValue = emotions[emotionName] || 0;
-            const percentage = Math.round(emotionValue * 100);
-
-            item.querySelector(".emotion-fill").style.width = percentage + "%";
-            item.querySelector(".emotion-value").textContent = percentage + "%";
-          });
-        }
-
-        addToHistory(emotions) {
-          const dominant = this.getDominantEmotion(emotions);
-          const timestamp = new Date().toLocaleTimeString("id-ID");
-
-          this.emotionHistory.unshift({
-            timestamp,
-            dominant,
-            emotions,
-          });
-
-          if (this.emotionHistory.length > 50) {
-            this.emotionHistory.pop();
-          }
-
-          this.updateHistoryDisplay();
-        }
-
-        getDominantEmotion(emotions) {
-          let maxValue = 0;
-          let dominantEmotion = "neutral";
-
-          Object.entries(emotions).forEach(([emotion, value]) => {
-            if (value > maxValue) {
-              maxValue = value;
-              dominantEmotion = emotion;
+            
+            stopTracking() {
+                this.isTracking = false;
+                
+                if (this.camera) {
+                    this.camera.stop();
+                }
+                
+                if (this.video.srcObject) {
+                    this.video.srcObject.getTracks().forEach(track => track.stop());
+                    this.video.srcObject = null;
+                }
+                
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                this.startBtn.disabled = false;
+                this.stopBtn.disabled = true;
+                this.status.textContent = 'Tracking stoped.';
+                this.status.className = 'status';
+                
+                // Reset face metrics
+                document.getElementById('faceDetected').textContent = '❌';
+                document.getElementById('blinkRate').textContent = '-';
+                document.getElementById('mouthOpen').textContent = '-';
+                document.getElementById('headPose').textContent = '-';
             }
-          });
-
-          return {
-            name: dominantEmotion,
-            confidence: Math.round(maxValue * 100),
-          };
-        }
-
-        updateHistoryDisplay() {
-          if (this.emotionHistory.length === 0) {
-            this.historyData.innerHTML =
-              '<p style="text-align: center; color: #ccc;">Belum ada data...</p>';
-            return;
-          }
-
-          const historyHTML = this.emotionHistory
-            .slice(0, 10)
-            .map(
-              (item) => `
+            
+            onResults(results) {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+                    const landmarks = results.multiFaceLandmarks[0];
+                    
+                    // Draw face landmarks
+                    this.drawFaceLandmarks(landmarks);
+                    
+                    // Analyze emotions based on facial features
+                    const emotions = this.analyzeFacialFeatures(landmarks);
+                    
+                    // Update displays
+                    this.updateEmotionDisplay(emotions);
+                    this.updateFaceMetrics(landmarks);
+                    this.addToHistory(emotions);
+                    
+                    document.getElementById('faceDetected').textContent = '✅';
+                } else {
+                    document.getElementById('faceDetected').textContent = '❌';
+                }
+            }
+            
+            drawFaceLandmarks(landmarks) {
+                this.ctx.fillStyle = '#00ff00';
+                this.ctx.strokeStyle = '#00ff00';
+                this.ctx.lineWidth = 1;
+                
+                // Draw face contour
+                this.ctx.beginPath();
+                const faceContour = [10, 151, 9, 8, 168, 6, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234, 127, 162, 21, 54, 103, 67, 109, 10];
+                
+                landmarks.forEach((landmark, index) => {
+                    const x = landmark.x * this.canvas.width;
+                    const y = landmark.y * this.canvas.height;
+                    
+                    if (faceContour.includes(index)) {
+                        this.ctx.fillRect(x - 1, y - 1, 2, 2);
+                    }
+                });
+                
+                // Draw eyes
+                this.drawEyes(landmarks);
+                
+                // Draw mouth
+                this.drawMouth(landmarks);
+            }
+            
+            drawEyes(landmarks) {
+                this.ctx.fillStyle = '#ff0000';
+                
+                // Left eye
+                const leftEye = [33, 7, 163, 144, 145, 153, 154, 155, 133, 173, 157, 158, 159, 160, 161, 246];
+                leftEye.forEach(index => {
+                    const point = landmarks[index];
+                    const x = point.x * this.canvas.width;
+                    const y = point.y * this.canvas.height;
+                    this.ctx.fillRect(x - 1, y - 1, 2, 2);
+                });
+                
+                // Right eye
+                const rightEye = [362, 382, 381, 380, 374, 373, 390, 249, 263, 466, 388, 387, 386, 385, 384, 398];
+                rightEye.forEach(index => {
+                    const point = landmarks[index];
+                    const x = point.x * this.canvas.width;
+                    const y = point.y * this.canvas.height;
+                    this.ctx.fillRect(x - 1, y - 1, 2, 2);
+                });
+            }
+            
+            drawMouth(landmarks) {
+                this.ctx.fillStyle = '#0000ff';
+                
+                // Mouth outline
+                const mouth = [61, 84, 17, 314, 405, 320, 307, 375, 321, 308, 324, 318, 402, 317, 14, 87, 178, 88, 95, 78, 191, 80, 81, 82, 13, 312, 311, 310, 415, 13];
+                mouth.forEach(index => {
+                    const point = landmarks[index];
+                    const x = point.x * this.canvas.width;
+                    const y = point.y * this.canvas.height;
+                    this.ctx.fillRect(x - 1, y - 1, 2, 2);
+                });
+            }
+            
+            analyzeFacialFeatures(landmarks) {
+                // Simple emotion analysis based on facial geometry
+                const emotions = {
+                    happy: 0,
+                    sad: 0,
+                    angry: 0,
+                    surprised: 0,
+                    focused: 0,
+                    neutral: 0.5
+                };
+                
+                // Mouth analysis
+                const mouthLeft = landmarks[61];
+                const mouthRight = landmarks[291];
+                const mouthTop = landmarks[13];
+                const mouthBottom = landmarks[14];
+                
+                const mouthWidth = Math.abs(mouthRight.x - mouthLeft.x);
+                const mouthHeight = Math.abs(mouthBottom.y - mouthTop.y);
+                const mouthRatio = mouthHeight / mouthWidth;
+                
+                // Eye analysis
+                const leftEyeTop = landmarks[159];
+                const leftEyeBottom = landmarks[145];
+                const rightEyeTop = landmarks[386];
+                const rightEyeBottom = landmarks[374];
+                
+                const leftEyeHeight = Math.abs(leftEyeBottom.y - leftEyeTop.y);
+                const rightEyeHeight = Math.abs(rightEyeBottom.y - rightEyeTop.y);
+                const avgEyeHeight = (leftEyeHeight + rightEyeHeight) / 2;
+                
+                // Eyebrow analysis
+                const leftBrow = landmarks[70];
+                const rightBrow = landmarks[107];
+                const noseBridge = landmarks[9];
+                
+                const browHeight = Math.abs(((leftBrow.y + rightBrow.y) / 2) - noseBridge.y);
+                
+                // Emotion detection logic
+                if (mouthRatio > 0.02 && avgEyeHeight > 0.01) {
+                    emotions.surprised = Math.min(mouthRatio * 20, 1);
+                }
+                
+                if (mouthWidth > 0.05 && mouthRatio < 0.015) {
+                    emotions.happy = Math.min(mouthWidth * 10, 1);
+                }
+                
+                if (browHeight < 0.02) {
+                    emotions.angry = Math.min((0.02 - browHeight) * 30, 1);
+                }
+                
+                if (avgEyeHeight < 0.008) {
+                    emotions.focused = Math.min((0.008 - avgEyeHeight) * 50, 1);
+                }
+                
+                if (mouthRatio < 0.01 && avgEyeHeight < 0.012) {
+                    emotions.sad = Math.min((0.01 - mouthRatio) * 20, 1);
+                }
+                
+                // Normalize emotions
+                const total = Object.values(emotions).reduce((sum, val) => sum + val, 0);
+                if (total > 0) {
+                    Object.keys(emotions).forEach(key => {
+                        emotions[key] = emotions[key] / total;
+                    });
+                }
+                
+                return emotions;
+            }
+            
+            updateFaceMetrics(landmarks) {
+                // Blink detection
+                const leftEyeTop = landmarks[159];
+                const leftEyeBottom = landmarks[145];
+                const rightEyeTop = landmarks[386];
+                const rightEyeBottom = landmarks[374];
+                
+                const leftEyeHeight = Math.abs(leftEyeBottom.y - leftEyeTop.y);
+                const rightEyeHeight = Math.abs(rightEyeBottom.y - rightEyeTop.y);
+                const avgEyeHeight = (leftEyeHeight + rightEyeHeight) / 2;
+                
+                if (avgEyeHeight < 0.006) {
+                    const now = Date.now();
+                    if (now - this.lastBlink > 200) {
+                        this.blinkCount++;
+                        this.lastBlink = now;
+                    }
+                }
+                
+                const timeElapsed = (Date.now() - this.startTime) / 60000; // minutes
+                const blinkRate = timeElapsed > 0 ? Math.round(this.blinkCount / timeElapsed) : 0;
+                
+                // Mouth openness
+                const mouthTop = landmarks[13];
+                const mouthBottom = landmarks[14];
+                const mouthOpenness = Math.abs(mouthBottom.y - mouthTop.y);
+                const mouthPercent = Math.round(mouthOpenness * 1000);
+                
+                // Head pose (simplified)
+                const noseTip = landmarks[1];
+                const headPose = noseTip.x > 0.55 ? 'Right' : noseTip.x < 0.45 ? 'Left' : 'Center';
+                
+                // Update display
+                document.getElementById('blinkRate').textContent = `${blinkRate}/min`;
+                document.getElementById('mouthOpen').textContent = `${mouthPercent}%`;
+                document.getElementById('headPose').textContent = headPose;
+            }
+            
+            updateEmotionDisplay(emotions) {
+                const emotionItems = this.emotionData.querySelectorAll('.emotion-item');
+                const emotionNames = ['happy', 'sad', 'angry', 'surprised', 'focused', 'neutral'];
+                
+                emotionItems.forEach((item, index) => {
+                    const emotionName = emotionNames[index];
+                    const emotionValue = emotions[emotionName] || 0;
+                    const percentage = Math.round(emotionValue * 100);
+                    
+                    item.querySelector('.emotion-fill').style.width = percentage + '%';
+                    item.querySelector('.emotion-value').textContent = percentage + '%';
+                });
+            }
+            
+            addToHistory(emotions) {
+                const dominant = this.getDominantEmotion(emotions);
+                const timestamp = new Date().toLocaleTimeString('id-ID');
+                
+                this.emotionHistory.unshift({
+                    timestamp,
+                    dominant,
+                    emotions
+                });
+                
+                if (this.emotionHistory.length > 50) {
+                    this.emotionHistory.pop();
+                }
+                
+                this.updateHistoryDisplay();
+            }
+            
+            getDominantEmotion(emotions) {
+                let maxValue = 0;
+                let dominantEmotion = 'neutral';
+                
+                Object.entries(emotions).forEach(([emotion, value]) => {
+                    if (value > maxValue) {
+                        maxValue = value;
+                        dominantEmotion = emotion;
+                    }
+                });
+                
+                return {
+                    name: dominantEmotion,
+                    confidence: Math.round(maxValue * 100)
+                };
+            }
+            
+            updateHistoryDisplay() {
+                if (this.emotionHistory.length === 0) {
+                    this.historyData.innerHTML = '<p style="text-align: center; color: #ccc;">Belum ada data...</p>';
+                    return;
+                }
+                
+                const historyHTML = this.emotionHistory.slice(0, 10).map(item => `
                     <div class="history-item">
                         <span class="timestamp">${item.timestamp}</span>
                         <span class="dominant-emotion">${item.dominant.name} (${item.dominant.confidence}%)</span>
                     </div>
-                `
-            )
-            .join("");
-
-          this.historyData.innerHTML = historyHTML;
+                `).join('');
+                
+                this.historyData.innerHTML = historyHTML;
+            }
+            
+            clearHistory() {
+                this.emotionHistory = [];
+                this.updateHistoryDisplay();
+                this.blinkCount = 0;
+                this.startTime = Date.now();
+            }
         }
-
-        clearHistory() {
-          this.emotionHistory = [];
-          this.updateHistoryDisplay();
-          this.blinkCount = 0;
-          this.startTime = Date.now();
-        }
-      }
-
-      // Initialize when page loads
-      window.addEventListener("load", () => {
-        // Check if MediaPipe is available
-        if (typeof FaceMesh !== "undefined" && typeof Camera !== "undefined") {
-          new EmotionTracker();
-        } else {
-          document.getElementById("status").textContent =
-            "Gagal memuat MediaPipe. Coba refresh halaman.";
-          document.getElementById("status").className = "status error";
-        }
-      });
+        
+        // Initialize when page loads
+        window.addEventListener('load', () => {
+            // Check if MediaPipe is available
+            if (typeof FaceMesh !== 'undefined' && typeof Camera !== 'undefined') {
+                new EmotionTracker();
+            } else {
+                document.getElementById('status').textContent = 'Gagal memuat MediaPipe. Coba refresh halaman.';
+                document.getElementById('status').className = 'status error';
+            }
+        });
     </script>
   </body>
 </html>
